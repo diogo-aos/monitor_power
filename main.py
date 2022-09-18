@@ -1,13 +1,24 @@
 import asyncio
 import os
+import sys
+from db import csv_log_reading
 
 from meross_iot.controller.mixins.electricity import ElectricityMixin
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 
-EMAIL = os.environ.get('MEROSS_EMAIL') or "YOUR_MEROSS_CLOUD_EMAIL"
-PASSWORD = os.environ.get('MEROSS_PASSWORD') or "YOUR_MEROSS_CLOUD_PASSWORD"
+necessary_vars = [
+    'MEROSS_EMAIL',
+    'MEROSS_PASSWORD'
+]
 
+for var in necessary_vars:
+    if var not in os.environ:
+        print(f'{var} environment variable necessary')
+        sys.exit(1)
+
+EMAIL = os.environ.get('MEROSS_EMAIL')
+PASSWORD = os.environ.get('MEROSS_PASSWORD')
 
 async def main():
     # Setup the HTTP client API from user-password
@@ -33,10 +44,12 @@ async def main():
         # Read the electricity power/voltage/current
         instant_consumption = await dev.async_get_instant_metrics()
         print(f"Current consumption data: {instant_consumption}")
-        instant_consumption.power
-        instant_consumption.current
-        instant_consumption.voltage
-        instant_consumption.sample_timestamp
+        # instant_consumption.power
+        # instant_consumption.current
+        # instant_consumption.voltage
+        # instant_consumption.sample_timestamp
+
+        csv_log_reading(dev, instant_consumption)
 
         # TODO register device - type, uuid, name, hardware version, firmware version,
         # dev.type - str
