@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 from db import csv_log_reading
+import time
 
 from meross_iot.controller.mixins.electricity import ElectricityMixin
 from meross_iot.http_api import MerossHttpClient
@@ -37,27 +38,31 @@ async def main():
     else:
         dev = devs[0]
 
-        # Update device status: this is needed only the very first time we play with this device (or if the
-        #  connection goes down)
-        await dev.async_update()
+        while True:
 
-        # Read the electricity power/voltage/current
-        instant_consumption = await dev.async_get_instant_metrics()
-        print(f"Current consumption data: {instant_consumption}")
-        # instant_consumption.power
-        # instant_consumption.current
-        # instant_consumption.voltage
-        # instant_consumption.sample_timestamp
+            # Update device status: this is needed only the very first time we play with this device (or if the
+            #  connection goes down)
+            await dev.async_update()
 
-        csv_log_reading(dev, instant_consumption)
+            # Read the electricity power/voltage/current
+            instant_consumption = await dev.async_get_instant_metrics()
+            print(f"Current consumption data: {instant_consumption}")
+            # instant_consumption.power
+            # instant_consumption.current
+            # instant_consumption.voltage
+            # instant_consumption.sample_timestamp
 
-        # TODO register device - type, uuid, name, hardware version, firmware version,
-        # dev.type - str
-        # dev.uuid  str
-        # dev.name - str
-        # dev.firmware_version - str
-        # dev.hardware_version - str
-        # dev.lan_ip
+            csv_log_reading(dev, instant_consumption)
+
+            # TODO register device - type, uuid, name, hardware version, firmware version,
+            # dev.type - str
+            # dev.uuid  str
+            # dev.name - str
+            # dev.firmware_version - str
+            # dev.hardware_version - str
+            # dev.lan_ip
+
+            time.sleep(60)
 
     # Close the manager and logout from http_api
     manager.close()
